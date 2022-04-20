@@ -1,52 +1,105 @@
-import { useState } from 'react'
-import { Navbar, Nav, Container, Form } from 'react-bootstrap';
+import { useState, useRef, useEffect } from 'react';
+import { Navbar, Image, Nav, Container, Form } from 'react-bootstrap';
 import WalletConnect from './WalletConnect';
 import styled from 'styled-components';
+import Logo from '../assets/logo.png';
 
-const Navigation = ({className}) => {
-    return(
-        <div className={className}>
-            <Navbar collapseOnSelect fixed='top' expand='sm'>
-            <Navbar.Brand className="margin"  href='/'>CryptoWorld</Navbar.Brand>
-                    <Navbar.Toggle className="margin" aria-controls='responsive-navbar-nav' />
-                    <Navbar.Collapse id='responsive-navbar-nav'>
-                        <Nav  className="m-auto">
-                            <Nav.Link href='/'>Home</Nav.Link>
-                            <Nav.Link href='/mint'>Mint</Nav.Link>
-                            <Nav.Link href='/stake'>Stake</Nav.Link>
-                        </Nav>
-                    <Form className={'margin'}>
-                        <WalletConnect/>
-                    </Form>
-                    </Navbar.Collapse>
-            </Navbar>
-        </div>
-    )
-}
+const Navigation = ({ className }) => {
+  const [navBackground, setNavBackground] = useState(false);
+
+  const navRef = useRef();
+  navRef.current = navBackground;
+  useEffect(() => {
+    const handleScroll = () => {
+      const show = window.scrollY > 50;
+      if (navRef.current !== show) {
+        setNavBackground(show);
+      }
+    };
+    document.addEventListener('scroll', handleScroll);
+    return () => {
+      document.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  return (
+    <div className={className}>
+      <Navbar
+        expand="md"
+        fixed="top"
+        collapseOnSelect
+        className={`navbarBackgroundResponsive ${
+          navBackground ? 'navbarBackground' : 'bg-transparent'
+        }`}>
+        <Navbar.Brand className="margin" href="/">
+          PUSS NFT
+        </Navbar.Brand>
+        <Navbar.Toggle className="margin" aria-controls="responsive-navbar-nav" />
+        <Navbar.Collapse id="responsive-navbar-nav">
+          <Nav className="m-auto">
+            <Nav.Link href="/">Home</Nav.Link>
+            <Nav.Link href="/mint">Mint</Nav.Link>
+            <Nav.Link href="/stake">Adventure</Nav.Link>
+          </Nav>
+          <Form className={'margin'}>
+            <WalletConnect />
+          </Form>
+        </Navbar.Collapse>
+      </Navbar>
+    </div>
+  );
+};
 
 const NavigationBar = styled(Navigation)`
+  @media (min-width: 768px) {
+    .navbarBackground {
+      background-color: rgba(255, 182, 193, 0.9) !important;
+    }
+  }
 
-.nav-link{
-    color: ${props => props.theme.primaryOrange}  !important;
-    text-shadow: 2px 2px ${props => props.theme.primaryBlack};
-}
-.nav-link:hover {
-    color: ${props => props.theme.primaryPurple}  !important;
+  @media (max-width: 768px) {
+    .navbarBackgroundResponsive {
+      background-color: rgba(255, 182, 193, 0.9) !important;
+    }
+    .btn-primary {
+      background-color: transparent !important;
+      border: none;
+      font-size: 1.2rem;
+      padding-left: 0 !important;
+      margin-left: 5px;
+    }
+    .margin {
+      margin-left: 0 !important;
+    }
+    .nav-link {
+      font-size: 1.2rem;
+      color: ${(props) => props.theme.primaryOrange} !important;
+      text-shadow: 2px 2px ${(props) => props.theme.primaryBlack};
+    }
+  }
+
+  .nav-link {
     font-size: 1.2rem;
-    padding: 0.5rem  0.5rem 0 0.5rem;
-}
-.navbar-brand{
+    color: ${(props) => props.theme.primaryOrange} !important;
+    text-shadow: 2px 2px ${(props) => props.theme.primaryBlack};
+  }
+  .nav-link:hover {
+    color: ${(props) => props.theme.primaryPurple} !important;
+    font-size: 1.5rem;
+    padding: 0.5rem 0.5rem 0 0.5rem;
+  }
+  .navbar-brand {
     margin-right: 2rem;
-}
-.navbar-toggler{
-    background-color: ${props => props.theme.primaryPurple};
+    margin-left: 2rem !important;
+  }
+  .navbar-toggler {
+    background-color: ${(props) => props.theme.primaryPurple};
     color: white;
-}
-.margin{
-    margin-right:10px;
-    margin-left:10px;
-
-}
+  }
+  .margin {
+    margin-right: 10px;
+    margin-left: 10px;
+  }
 `;
 
 export default NavigationBar;
