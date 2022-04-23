@@ -27,17 +27,16 @@ const WalletConnect = () => {
     fetchEns: true
   });
 
+  const getAddress = (address) => {
+    return !address
+      ? ''
+      : `${address.slice(0, 3)}..${address.slice(address.length - 3, address.length)}`;
+  };
+
   if (accountData) {
     return (
       <div>
-        <img src={accountData.ens?.avatar} alt="ENS Avatar" />
-        <div>
-          {accountData.ens?.name
-            ? `${accountData.ens?.name} (${accountData.address})`
-            : accountData.address}
-        </div>
-        <div>Connected to {accountData.connector.name}</div>
-        <Button onClick={disconnect}>Disconnect</Button>
+        <Button onClick={disconnect}>Disconnect {getAddress(accountData.address)}</Button>
       </div>
     );
   }

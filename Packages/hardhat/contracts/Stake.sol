@@ -3,101 +3,110 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-
 import "./Puss.sol";
 import "./Gravy.sol";
 
-contract stakeNFT is Ownable, IERC721Receiver {
-
+contract Stake is Ownable, IERC721Receiver {
     uint256 public totalStaked;
 
-    uint rewardRate;//per hour
+    uint256 rewardRate;
     address tokenAddress;
     address nftAddress;
 
     struct Staker {
-        uint amountStaked;
-        uint timeOfLastUpdate;
-        uint rewardsOwed;
+        uint256 amountStaked;
+        uint256 timeOfLastUpdate;
+        uint256 rewardsOwed;
     }
 
     mapping(address => Staker) public stakers;
-    mapping(uint => bool) public vault;
+    mapping(uint256 => bool) public vault;
 
-    constructor(address _nftAddress, address _tokenAddress) { 
+    constructor(address _nftAddress, address _tokenAddress) {
         nftAddress = _nftAddress;
         tokenAddress = _tokenAddress;
         rewardRate = 10;
     }
 
-    function setRewardRate(uint _rewardRate) public onlyOwner{
+    function setRewardRate(uint256 _rewardRate) public onlyOwner {
         require(_rewardRate > 0, "Reward rate must be higher than 0");
         rewardRate = _rewardRate;
     }
 
-    function stake(uint[] calldata tokenIds) external {
-        stakers[msg.sender].rewardsOwed += calculateRewards();
-        for(uint i =0; i < tokenIds.length; i++ ){
-            stake(tokenIds[i]);
+    function calculateRewards(address _address) public view returns (uint256) {
+        //TODO: figure this shit out correctly
+
+        uint256 timeSinceLast = block.timestamp -
+            stakers[_address].timeOfLastUpdate;
+        uint256 rewardsOwed = (timeSinceLast / 1 minutes) *
+            stakers[_address].amountStaked *
+            rewardRate;
+
+        return (rewardsOwed);
+    }
+
+    function stake(uint256[] calldata _tokenIds) public {
+        stakers[msg.sender].rewardsOwed += calculateRewards(msg.sender);
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            stake(_tokenIds[i]);
         }
     }
 
-    function stake(uint _tokenId) private {
-            require(Puss(nftAddress).ownerOf(_tokenId) == msg.sender, "Get your own NFTs");
-            require(vault[_tokenId] == false, "NFT already staked");
-            vault[_tokenId] = true;
-            stakers[msg.sender].amountStaked += 1;
-            Puss(nftAddress).transferFrom(msg.sender, address(this), _tokenId);
+    function stake(uint256 _tokenId) private {
+        require(
+            Puss(nftAddress).ownerOf(_tokenId) == msg.sender,
+            "Get your own NFTs"
+        );
+        require(vault[_tokenId] == false, "NFT already staked");
+        vault[_tokenId] = true;
 
-            emit PussStaked(msg.sender, _tokenId);
+        _addTokenToOwnerEnumeration(msg.sender, _tokenId);
+        _addTokenToAllTokensEnumeration(_tokenId);
+
+        stakers[msg.sender].amountStaked += 1;
+        Puss(nftAddress).transferFrom(msg.sender, address(this), _tokenId);
+
+        emit PussStaked(msg.sender, _tokenId);
     }
 
-    function unstake(uint[] calldata tokenIds)external onlyStaker{
-        stakers[msg.sender].rewardsOwed += calculateRewards();
-        for(uint i =0; i < tokenIds.length; i++ ){
+    function unstake(uint256[] calldata tokenIds) public onlyStaker {
+        stakers[msg.sender].rewardsOwed += calculateRewards(msg.sender);
+        for (uint256 i = 0; i < tokenIds.length; i++) {
             unstake(tokenIds[i]);
         }
     }
 
-    function unstake(uint _tokenId) private{
-            require(Puss(nftAddress).ownerOf(_tokenId) == msg.sender, "Get your own NFTs");
-            require(vault[_tokenId] == true, "NFT not staked");
-            vault[_tokenId] = false;
-            stakers[msg.sender].amountStaked -= 1;
-            Puss(nftAddress).transferFrom(address(this), msg.sender, _tokenId);
+    function unstake(uint256 _tokenId) private {
+        require(ownerOf(_tokenId), "Get your own NFTs");
+        require(vault[_tokenId] == true, "NFT not staked");
+        vault[_tokenId] = false;
 
-            emit PussUnstaked(msg.sender, _tokenId);
-    }
+        _removeTokenFromOwnerEnumeration(msg.sender, _tokenId);
+        _removeTokenFromAllTokensEnumeration(_tokenId);
 
-    function calculateRewards() internal view onlyStaker returns(uint){
-        uint timeSinceLast = block.timestamp - stakers[msg.sender].timeOfLastUpdate;
-        require(timeSinceLast >  1 hours, "No rewards earnt yet");
+        stakers[msg.sender].amountStaked -= 1;
+        Puss(nftAddress).transferFrom(address(this), msg.sender, _tokenId);
 
-        uint rewardsOwed = (timeSinceLast / 1 hours) * stakers[msg.sender].amountStaked * rewardRate;
-
-        return(rewardsOwed);
+        emit PussUnstaked(msg.sender, _tokenId);
     }
 
     function claimRewards() public {
-        uint rewards = stakers[msg.sender].rewardsOwed + calculateRewards();
+        uint256 rewards = stakers[msg.sender].rewardsOwed +
+            calculateRewards(msg.sender);
         require(rewards > 0, "No rewards to claim");
         stakers[msg.sender].rewardsOwed = 0;
         Gravy(tokenAddress).mint(msg.sender, rewards);
     }
 
-    function getRewardsOwed()external view onlyStaker returns(uint){
-        return calculateRewards();
+    function GetStakerData(address _address)
+        public
+        view
+        returns (Staker memory)
+    {
+        return stakers[_address];
     }
 
-    function getAmountStaked()external view onlyStaker returns(uint){
-        return stakers[msg.sender].amountStaked;
-    }
-
-    function getTimeSinceLast()external view onlyStaker returns(uint){
-        return stakers[msg.sender].timeOfLastUpdate;
-    }
-
-    modifier onlyStaker(){
+    modifier onlyStaker() {
         require(stakers[msg.sender].amountStaked > 0, "No items staked");
         _;
     }
@@ -112,7 +121,101 @@ contract stakeNFT is Ownable, IERC721Receiver {
         uint256,
         bytes calldata
     ) external pure override returns (bytes4) {
-      require(from == address(0x0), "Cannot send nfts to Vault directly");
-      return IERC721Receiver.onERC721Received.selector;
+        require(from == address(0x0), "Cannot send nfts to Vault directly");
+        return IERC721Receiver.onERC721Received.selector;
+    }
+
+    //ripped from ERC721Enumerable
+    mapping(address => mapping(uint256 => uint256)) private _ownedTokens;
+
+    // Mapping from token ID to index of the owner tokens list
+    mapping(uint256 => uint256) private _ownedTokensIndex;
+
+    // Array with all token ids, used for enumeration
+    uint256[] private _allTokens;
+
+    // Mapping from token id to position in the allTokens array
+    mapping(uint256 => uint256) private _allTokensIndex;
+
+    function balanceOf(address _address) public view returns (uint256) {
+        return stakers[_address].amountStaked;
+    }
+
+    function ownerOf(uint256 tokenId) private view returns (bool) {
+        uint256 balance = stakers[msg.sender].amountStaked;
+        for (uint256 i = 0; i < balance; i++) {
+            if (tokenOfOwnerByIndex(msg.sender, i) == tokenId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function GetAllHolderTokens(address _address)
+        public
+        view
+        returns (uint256[] memory)
+    {
+        uint256 balance = stakers[_address].amountStaked;
+        require(balance > 0, "No Puss staked");
+
+        uint256[] memory ownedTokens = new uint256[](balance);
+        for (uint256 i = 0; i < balance; i++) {
+            ownedTokens[i] = tokenOfOwnerByIndex(_address, i);
+        }
+        return ownedTokens;
+    }
+
+    function tokenOfOwnerByIndex(address _ownerAddress, uint256 _index)
+        public
+        view
+        returns (uint256)
+    {
+        require(
+            _index < stakers[_ownerAddress].amountStaked,
+            "owner index out of bounds"
+        );
+        return _ownedTokens[_ownerAddress][_index];
+    }
+
+    function _addTokenToOwnerEnumeration(address to, uint256 tokenId) private {
+        uint256 length = stakers[to].amountStaked;
+        _ownedTokens[to][length] = tokenId;
+        _ownedTokensIndex[tokenId] = length;
+    }
+
+    function _addTokenToAllTokensEnumeration(uint256 tokenId) private {
+        _allTokensIndex[tokenId] = _allTokens.length;
+        _allTokens.push(tokenId);
+    }
+
+    function _removeTokenFromOwnerEnumeration(address from, uint256 tokenId)
+        private
+    {
+        uint256 lastTokenIndex = stakers[from].amountStaked - 1;
+        uint256 tokenIndex = _ownedTokensIndex[tokenId];
+
+        if (tokenIndex != lastTokenIndex) {
+            uint256 lastTokenId = _ownedTokens[from][lastTokenIndex];
+
+            _ownedTokens[from][tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
+            _ownedTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
+        }
+
+        delete _ownedTokensIndex[tokenId];
+        delete _ownedTokens[from][lastTokenIndex];
+    }
+
+    function _removeTokenFromAllTokensEnumeration(uint256 tokenId) private {
+        uint256 lastTokenIndex = _allTokens.length - 1;
+        uint256 tokenIndex = _allTokensIndex[tokenId];
+
+        uint256 lastTokenId = _allTokens[lastTokenIndex];
+
+        _allTokens[tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
+        _allTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
+
+        delete _allTokensIndex[tokenId];
+        _allTokens.pop();
     }
 }

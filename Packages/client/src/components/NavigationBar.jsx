@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { Navbar, Image, Nav, Container, Form } from 'react-bootstrap';
 import WalletConnect from './WalletConnect';
 import styled from 'styled-components';
-import Logo from '../assets/logo.png';
 
 const Navigation = ({ className }) => {
   const [navBackground, setNavBackground] = useState(false);
@@ -37,9 +36,9 @@ const Navigation = ({ className }) => {
         <Navbar.Toggle className="margin" aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="m-auto">
-            <Nav.Link href="/">Home</Nav.Link>
-            <Nav.Link href="/mint">Mint</Nav.Link>
+            <Nav.Link href="/">Mint</Nav.Link>
             <Nav.Link href="/stake">Adventure</Nav.Link>
+            <Nav.Link href="/Gallary">Gallary</Nav.Link>
           </Nav>
           <Form className={'margin'}>
             <WalletConnect />
@@ -64,28 +63,31 @@ const NavigationBar = styled(Navigation)`
     .btn-primary {
       background-color: transparent !important;
       border: none;
-      font-size: 1.2rem;
+      font-size: 1.5rem;
       padding-left: 0 !important;
-      margin-left: 5px;
+      padding-top: 0 !important;
+      margin-left: 0px;
     }
     .margin {
-      margin-left: 0 !important;
+      margin-left: 0px !important;
     }
     .nav-link {
-      font-size: 1.2rem;
+      font-size: 1.5rem;
       color: ${(props) => props.theme.primaryOrange} !important;
       text-shadow: 2px 2px ${(props) => props.theme.primaryBlack};
     }
   }
 
   .nav-link {
-    font-size: 1.2rem;
+    margin-left: 2rem;
+    margin-right: 2rem;
+    font-size: 1.5rem;
     color: ${(props) => props.theme.primaryOrange} !important;
     text-shadow: 2px 2px ${(props) => props.theme.primaryBlack};
   }
   .nav-link:hover {
     color: ${(props) => props.theme.primaryPurple} !important;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     padding: 0.5rem 0.5rem 0 0.5rem;
   }
   .navbar-brand {

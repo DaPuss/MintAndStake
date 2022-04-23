@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, Container, Form, Row, Col } from 'react-bootstrap';
 import WalletConnect from './WalletConnect';
 import styled from 'styled-components';
+import { RiDiscordLine, RiTwitterLine } from 'react-icons/Ri';
 
 const FooterBar = ({ className }) => {
   return (
@@ -9,8 +10,12 @@ const FooterBar = ({ className }) => {
       <Container fluid className="footerContainer mt-5 mb-3">
         <Row xs={1} md={2}>
           <Col>
-            <Button className="m-2">Twitter</Button>
-            <Button className="m-2">Discord</Button>
+            <Button className="m-2">
+              <RiTwitterLine size={50} />
+            </Button>
+            <Button className="m-2">
+              <RiDiscordLine size={50} />
+            </Button>
           </Col>
           <Col>
             <p>Created by @ThePuss 2022</p>
@@ -40,6 +45,7 @@ const Footer = styled(FooterBar)`
   }
   p {
     margin-left: 20px;
+    margin-top: 25px;
   }
 `;
 

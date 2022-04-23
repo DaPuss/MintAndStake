@@ -12,13 +12,11 @@ const etherscanApiKey = import.meta.env.VITE_ETHERSCAN_API_KEY;
 const infuraId = import.meta.env.VITE_INFURA_ID;
 
 // Chains for connectors to support
-const chains = [chain.avalanche, chain.avalancheFuji];
-const defaultChain = chain.avalanche;
+const chains = [chain.hardhat, chain.avalancheFuji];
+const defaultChain = chain.hardhat;
 
-// Set up connectors
+export const provider = ({ chainId }) => new providers.Web3Provider(window.ethereum, chainId);
+
 export const connectors = ({ chainId }) => {
-  const rpcUrl = chains.find((x) => x.id === chainId)?.rpcUrls?.[0] ?? defaultChain.rpcUrls[0];
   return [new InjectedConnector({ chains, options: { shimDisconnect: true } })];
 };
-
-export const isChainSupported = (chainId) => chains.some((x) => x.id === chainId);
