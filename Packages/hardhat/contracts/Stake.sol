@@ -7,9 +7,10 @@ import "./Puss.sol";
 import "./Gravy.sol";
 
 contract Stake is Ownable, IERC721Receiver {
-    uint256 public totalStaked;
-
-    uint256 rewardRate;
+    uint256 private _totalSupply;
+    uint256 public rewardRate = 1000;
+    uint256 public lastUpdateTime;
+    uint256 public rewardPerTokenStored;
     address tokenAddress;
     address nftAddress;
 
@@ -18,35 +19,45 @@ contract Stake is Ownable, IERC721Receiver {
         uint256 timeOfLastUpdate;
         uint256 rewardsOwed;
     }
-
+    mapping(address => uint256) public userRewardPerTokenPaid;
     mapping(address => Staker) public stakers;
     mapping(uint256 => bool) public vault;
 
     constructor(address _nftAddress, address _tokenAddress) {
         nftAddress = _nftAddress;
         tokenAddress = _tokenAddress;
-        rewardRate = 10;
     }
 
-    function setRewardRate(uint256 _rewardRate) public onlyOwner {
-        require(_rewardRate > 0, "Reward rate must be higher than 0");
-        rewardRate = _rewardRate;
+    function calculateRewards(address account) public view returns (uint256) {
+        return
+            ((stakers[msg.sender].amountStaked *
+                (rewardPerToken() - userRewardPerTokenPaid[account])) / 1e18) +
+            stakers[account].rewardsOwed;
     }
 
-    function calculateRewards(address _address) public view returns (uint256) {
-        //TODO: figure this shit out correctly
-
-        uint256 timeSinceLast = block.timestamp -
-            stakers[_address].timeOfLastUpdate;
-        uint256 rewardsOwed = (timeSinceLast / 1 minutes) *
-            stakers[_address].amountStaked *
-            rewardRate;
-
-        return (rewardsOwed);
+    function rewardPerToken() public view returns (uint256) {
+        if (_totalSupply == 0) {
+            return rewardPerTokenStored;
+        }
+        return
+            rewardPerTokenStored +
+            (((block.timestamp - lastUpdateTime) * rewardRate * 1e18) /
+                _totalSupply);
     }
 
-    function stake(uint256[] calldata _tokenIds) public {
-        stakers[msg.sender].rewardsOwed += calculateRewards(msg.sender);
+    modifier updateReward(address account) {
+        rewardPerTokenStored = rewardPerToken();
+        lastUpdateTime = block.timestamp;
+
+        stakers[account].rewardsOwed = calculateRewards(account);
+        userRewardPerTokenPaid[account] = rewardPerTokenStored;
+        _;
+    }
+
+    function stake(uint256[] calldata _tokenIds)
+        public
+        updateReward(msg.sender)
+    {
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             stake(_tokenIds[i]);
         }
@@ -69,8 +80,10 @@ contract Stake is Ownable, IERC721Receiver {
         emit PussStaked(msg.sender, _tokenId);
     }
 
-    function unstake(uint256[] calldata tokenIds) public onlyStaker {
-        stakers[msg.sender].rewardsOwed += calculateRewards(msg.sender);
+    function unstake(uint256[] calldata tokenIds)
+        public
+        updateReward(msg.sender)
+    {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             unstake(tokenIds[i]);
         }
@@ -90,25 +103,10 @@ contract Stake is Ownable, IERC721Receiver {
         emit PussUnstaked(msg.sender, _tokenId);
     }
 
-    function claimRewards() public {
-        uint256 rewards = stakers[msg.sender].rewardsOwed +
-            calculateRewards(msg.sender);
-        require(rewards > 0, "No rewards to claim");
+    function claimRewards() public updateReward(msg.sender) {
+        uint256 rewards = stakers[msg.sender].rewardsOwed;
         stakers[msg.sender].rewardsOwed = 0;
         Gravy(tokenAddress).mint(msg.sender, rewards);
-    }
-
-    function GetStakerData(address _address)
-        public
-        view
-        returns (Staker memory)
-    {
-        return stakers[_address];
-    }
-
-    modifier onlyStaker() {
-        require(stakers[msg.sender].amountStaked > 0, "No items staked");
-        _;
     }
 
     event PussStaked(address owner, uint256 tokenId);

@@ -1,29 +1,30 @@
 import React, { useState } from 'react';
-import { Modal, Button, Stack, Form } from 'react-bootstrap';
+import { Modal, Button, Form } from 'react-bootstrap';
 import styled from 'styled-components';
-import usePussAction from '../../hooks/usePussAction';
-import useGravyAction from '../../hooks/useGravyAction';
+import { useContractAction, abi, contracts } from '../../hooks/index.js';
 
 const ChangeNameModal = ({ handleClose, show, tokenId }) => {
   const [value, setValue] = useState('');
-  const { callContract, wait } = usePussAction('changeName');
-  const { writeGravyContract, waitGravyContract } = useGravyAction('increaseAllowance');
+  const { writeContract: changeNameWrite } = useContractAction(
+    'changeName',
+    contracts.PUSS,
+    abi.PUSS
+  );
+  const { writeContract: increaceAllowanceWrite } = useContractAction(
+    'increaseAllowance',
+    contracts.GRAVY,
+    abi.GRAVY
+  );
 
   const onNameChange = async () => {
     //allowence
-    const txnGravy = await writeGravyContract({
+    await increaceAllowanceWrite({
       args: [import.meta.env.VITE_PUSS_CONTRACT, 100]
     });
-    if (typeof txnGravy.data !== 'undefined') {
-      await waitGravyContract({ wait: txnGravy.data.wait });
-    }
-    //change name
-    const txn = await callContract({
+    //changeName
+    await changeNameWrite({
       args: [value, Number(tokenId)]
     });
-    if (typeof txn.data !== 'undefined') {
-      await wait({ wait: txn.data.wait });
-    }
     handleClose();
   };
 

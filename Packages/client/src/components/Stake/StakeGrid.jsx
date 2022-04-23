@@ -5,23 +5,23 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { BigNumber } from 'ethers';
 import { formatMetadata, formatTokenIds } from '../../utils/transactionFormatting';
+import { useContractAction, useContractRead, abi, contracts } from '../../hooks/index.js';
 import StakeCard from './StakeCard';
-import usePussContract from '../../hooks/usePussContract';
-import useStakeContract from '../../hooks/useStakeContract';
-import useStakeAction from '../../hooks/useStakeAction';
-import usePussAction from '../../hooks/usePussAction';
 
 const StakeGrid = () => {
   const [{ data: accountData }, disconnect] = useAccount({
     fetchEns: true
   });
   const navigate = useNavigate();
-  const { readStakeContract } = useStakeContract();
-  const { readContractFunction } = usePussContract();
-  const { callContract: callApproveForAll, wait: waitApproveAll } =
-    usePussAction('setApprovalForAll');
-  const { writeStakeContract: callStake, wait: waitStake } = useStakeAction('stake');
-  const { writeStakeContract: callUnstake, wait: waitUnstake } = useStakeAction('unstake');
+  const { readContract: readStakeContract } = useContractRead(contracts.STAKE, abi.STAKE);
+  const { readContract: readPussContract } = useContractRead(contracts.PUSS, abi.PUSS);
+  const { writeContract: approveAllWrite } = useContractAction(
+    'setApprovalForAll',
+    contracts.PUSS,
+    abi.PUSS
+  );
+  const { writeContract: stakeWrite } = useContractAction('stake', contracts.STAKE, abi.STAKE);
+  const { writeContract: unstakeWrite } = useContractAction('unstake', contracts.STAKE, abi.STAKE);
   const [selectedStakedId, setSelectedStakedId] = useState([]);
   const [selectedUnstakedId, setSelectedUnstakedId] = useState([]);
   const [card, setCards] = useState({});
@@ -42,7 +42,7 @@ const StakeGrid = () => {
         args: accountData.address
       });
       const ids = formatTokenIds(tokenIds.data);
-      const tokenMetadata = await readContractFunction('GetTokensMetaData', {
+      const tokenMetadata = await readPussContract('GetTokensMetaData', {
         args: [ids]
       });
       const metadata = formatMetadata(ids, tokenMetadata.data);
@@ -52,15 +52,15 @@ const StakeGrid = () => {
 
   const getUnstakedCards = async () => {
     if (!accountData?.address) return;
-    const balance = await readContractFunction('balanceOf', {
+    const balance = await readPussContract('balanceOf', {
       args: accountData.address
     });
     if (BigNumber.from(balance.data).toNumber() > 0) {
-      const tokenIds = await readContractFunction('GetAllHolderTokens', {
+      const tokenIds = await readPussContract('GetAllHolderTokens', {
         args: accountData.address
       });
       const ids = formatTokenIds(tokenIds.data);
-      const tokenMetadata = await readContractFunction('GetTokensMetaData', {
+      const tokenMetadata = await readPussContract('GetTokensMetaData', {
         args: [ids]
       });
       const metadata = formatMetadata(ids, tokenMetadata.data);
@@ -70,43 +70,48 @@ const StakeGrid = () => {
 
   const handleStakeClick = async () => {
     console.log('stake me: ' + selectedUnstakedId);
-    const txnApp = await callApproveForAll({
+    await approveAllWrite({
       args: [import.meta.env.VITE_STAKE_CONTRACT, true]
     });
-    if (typeof txnApp.data !== 'undefined') {
-      await waitApproveAll({ wait: txnApp.data.wait });
-    }
-    const txn = await callStake({
+
+    await stakeWrite({
       args: [selectedUnstakedId]
     });
-    if (typeof txn.data !== 'undefined') {
-      await waitStake({ wait: txn.data.wait });
-    }
 
-    let unstaked = [...card.unstaked.filter((cards) => !selectedUnstakedId.includes(cards.id))];
-    let staked = card?.staked ? card.staked : [];
-    staked = [...staked, ...card.unstaked.filter((cards) => selectedUnstakedId.includes(cards.id))];
-    console.log({ staked, unstaked });
-    setCards({ staked, unstaked });
-    setSelectedUnstakedId([]);
+    updateCards('stake');
   };
 
   const handleUnstakeClick = async () => {
     console.log('unstake me: ' + selectedStakedId);
-    const txn = await callUnstake({
+    await unstakeWrite({
       args: [selectedStakedId]
     });
-    if (typeof txn.data !== 'undefined') {
-      await waitUnstake({ wait: txn.data.wait });
+
+    updateCards('unstake');
+  };
+
+  const updateCards = (action) => {
+    if (action == 'stake') {
+      let unstaked = [...card.unstaked.filter((cards) => !selectedUnstakedId.includes(cards.id))];
+      let staked = card?.staked ? card.staked : [];
+      staked = [
+        ...staked,
+        ...card.unstaked.filter((cards) => selectedUnstakedId.includes(cards.id))
+      ];
+      setCards({ staked, unstaked });
+      setSelectedUnstakedId([]);
+    } else {
+      let staked = [...card.staked.filter((cards) => !selectedStakedId.includes(cards.id))];
+      let unstaked = card?.unstaked ? card.unstaked : [];
+      unstaked = [
+        ...unstaked,
+        ...card.staked.filter((cards) => selectedStakedId.includes(cards.id))
+      ];
+      console.log({ staked, unstaked });
+
+      setCards({ staked, unstaked });
+      setSelectedStakedId([]);
     }
-
-    let staked = [...card.staked.filter((cards) => !selectedStakedId.includes(cards.id))];
-    let unstaked = card?.unstaked ? card.unstaked : [];
-    unstaked = [...unstaked, ...card.staked.filter((cards) => selectedStakedId.includes(cards.id))];
-    console.log({ staked, unstaked });
-
-    setCards({ staked, unstaked });
-    setSelectedStakedId([]);
   };
 
   const handleStakedCardClick = (id) => {

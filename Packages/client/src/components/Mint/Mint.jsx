@@ -2,17 +2,15 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { useAccount, useConnect, useNetwork } from 'wagmi';
 import { Container, Button, Form, Image, Row, Col } from 'react-bootstrap';
-
 import styled from 'styled-components';
+import { useContractAction, useContractRead, abi, contracts } from '../../hooks/index.js';
 import Images from '../../assets';
-import usePussContract from '../../hooks/usePussContract';
-import usePussAction from '../../hooks/usePussAction';
 import DisplayCard from '../DisplayCard';
 import WalletConnect from '../WalletConnect';
 import MintButtons from './MintButtons';
 
 const Mint = () => {
-  const { readContractFunction } = usePussContract();
+  const { readContract } = useContractRead(contracts.PUSS, abi.PUSS);
   const [totalSupply, setTotalSupply] = useState(0);
   const [mintAmount, setMintAmount] = useState(0);
   const handleAdd = () => setMintAmount(mintAmount + 1);
@@ -21,7 +19,7 @@ const Mint = () => {
   };
 
   useEffect(async () => {
-    const result = await readContractFunction('totalSupply');
+    const result = await readContract('totalSupply');
     const supply = parseInt(result.data, 16);
     setTotalSupply(supply);
   }, []);
@@ -30,25 +28,16 @@ const Mint = () => {
     fetchEns: true
   });
 
-  const {
-    txnError,
-    callContract,
-    waitData: entryLWaitData,
-    waitLoading: entryLWaitLoading,
-    wait
-  } = usePussAction('mintPuss');
+  const { writeContract: mintPussWrite } = useContractAction('mintPuss', contracts.PUSS, abi.PUSS);
 
   const handleMint = async () => {
     if (mintAmount <= 0) return;
-    const txn = await callContract({
+    await mintPussWrite({
       args: [mintAmount],
       overrides: {
         value: ethers.utils.parseEther(mintAmount.toString(16))
       }
     });
-    if (typeof txn.data !== 'undefined') {
-      await wait({ wait: txn.data.wait });
-    }
     setTotalSupply(totalSupply + mintAmount);
     setMintAmount(0);
   };

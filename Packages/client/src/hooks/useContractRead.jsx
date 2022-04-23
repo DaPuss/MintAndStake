@@ -1,20 +1,24 @@
 import { useCallback } from 'react';
+import {
+  useContractWrite,
+  useSigner,
+  useProvider,
+  useContract,
+  useWaitForTransaction
+} from 'wagmi';
 import * as wagmi from 'wagmi';
-import { useSigner, useProvider, useContract, useContractRead, useWaitForTransaction } from 'wagmi';
 import { ethers } from 'ethers';
-import PussContract from '../contracts/Puss.json';
 
-const usePussContract = () => {
+const useContractRead = (addressOrName, contractInterface) => {
   const [{ data: signData }, getSigner] = useSigner();
-  const provider = useProvider();
 
   const contract = useContract({
-    addressOrName: import.meta.env.VITE_PUSS_CONTRACT,
-    contractInterface: PussContract.abi,
-    signerOrProvider: signData || provider
+    addressOrName,
+    contractInterface,
+    signerOrProvider: signData
   });
 
-  const readContractFunction = useCallback(
+  const readContract = useCallback(
     async (functionName, config = {}) => {
       const { args, overrides } = config;
       try {
@@ -34,9 +38,8 @@ const usePussContract = () => {
   );
 
   return {
-    contract,
-    readContractFunction
+    readContract
   };
 };
 
-export default usePussContract;
+export default useContractRead;

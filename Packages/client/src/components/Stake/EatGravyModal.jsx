@@ -1,30 +1,28 @@
 import React, { useState } from 'react';
-import { Modal, Button, Stack, Form } from 'react-bootstrap';
+import { Modal, Button, Form } from 'react-bootstrap';
 import styled from 'styled-components';
-import usePussAction from '../../hooks/usePussAction';
-import useGravyAction from '../../hooks/useGravyAction';
+import { useContractAction, abi, contracts } from '../../hooks/index.js';
 
 const EatGravyModal = ({ handleClose, show, tokenId }) => {
   const [value, setValue] = useState(0);
-  const { callContract, wait } = usePussAction('eatGravy');
-  const { writeGravyContract, waitGravyContract } = useGravyAction('increaseAllowance');
+  const { writeContract: increaceAllowanceWrite } = useContractAction(
+    'increaseAllowance',
+    contracts.GRAVY,
+    abi.GRAVY
+  );
+  const { writeContract: eatGravyWrite } = useContractAction('eatGravy', contracts.PUSS, abi.PUSS);
 
   const onEatGravy = async () => {
     //TODO: make sure balance is high enough
-
-    const txnGravy = await writeGravyContract({
+    //allowence
+    await increaceAllowanceWrite({
       args: [import.meta.env.VITE_PUSS_CONTRACT, value]
     });
-    if (typeof txnGravy.data !== 'undefined') {
-      await waitGravyContract({ wait: txnGravy.data.wait });
-    }
-    //change name
-    const txn = await callContract({
+    //eatGravy
+    await eatGravyWrite({
       args: [value, Number(tokenId)]
     });
-    if (typeof txn.data !== 'undefined') {
-      await wait({ wait: txn.data.wait });
-    }
+    handleClose();
   };
 
   return (

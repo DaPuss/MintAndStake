@@ -1,27 +1,30 @@
 import { useEffect, useState } from 'react';
-import { Container, Button, Form, Row, Col } from 'react-bootstrap';
+import { Container, Button } from 'react-bootstrap';
 import { useAccount, useBalance, useConnect } from 'wagmi';
 import { BigNumber } from 'ethers';
 import WalletConnect from '../WalletConnect';
 import StakeGrid from './StakeGrid';
 import styled from 'styled-components';
-import useStakeContract from '../../hooks/useStakeContract';
-import useGravyContract from '../../hooks/useGravyContract';
-import useStakeAction from '../../hooks/useStakeAction';
 
 const Stake = () => {
   const [currentGravy, setCurrentGravy] = useState(0);
   const [claimableGravy, setClaimableGravy] = useState(0);
-  const [{ data: accountData }, disconnect] = useAccount({
-    fetchEns: true
-  });
-  const { writeStakeContract: claimGravy, wait: waitGravyClaim } = useStakeAction('claimRewards');
-  const { readStakeContract } = useStakeContract();
-  const { readGravyContract } = useGravyContract();
+
+  const { readContract: readStakeContract } = useContractRead(contracts.STAKE, abi.STAKE);
+  const { writeContract: claimGravyWrite } = useContractAction(
+    'claimRewards',
+    contracts.STAKE,
+    abi.STAKE
+  );
+
   const [{ data, error, loading }, getBalance] = useBalance({
     addressOrName: '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199',
     token: import.meta.env.VITE_GRAVY_CONTRACT,
     watch: true
+  });
+
+  const [{ data: accountData }, disconnect] = useAccount({
+    fetchEns: true
   });
 
   useEffect(async () => {
@@ -29,25 +32,16 @@ const Stake = () => {
     const gravyToClaim = await readStakeContract('calculateRewards', {
       args: accountData.address
     });
-    console.log('Claim: ', gravyToClaim.data);
     setClaimableGravy(BigNumber.from(gravyToClaim.data).toNumber());
     const currentGravy = await getBalance();
-    console.log('Current: ', currentGravy);
     setCurrentGravy(BigNumber.from(currentGravy.data.value).toNumber());
   }, [accountData?.address]);
 
   const handleClaimGravy = async () => {
-    const txn = await claimGravy();
-    if (typeof txn.data !== 'undefined') {
-      await waitGravyClaim({ wait: txn.data.wait });
-    }
-    console.log('Claimed boi! : ', txn);
-    const gravyToClaim = await readStakeContract('calculateRewards', {
-      args: accountData.address
-    });
-    console.log('Claim: ', gravyToClaim.data);
-    setCurrentGravy(currentGravy + BigNumber.from(gravyToClaim.data).toNumber());
+    await claimGravyWrite();
     setClaimableGravy(0);
+    const currentGravy = await getBalance();
+    setCurrentGravy(BigNumber.from(currentGravy.data.value).toNumber());
   };
 
   return (

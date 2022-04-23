@@ -11,7 +11,7 @@ contract Puss is ERC721Enumerable, Ownable {
     uint256 public mintPrice;
     uint256 public nameChangeCost;
     address private gravyAddress;
-
+    uint256 randNonce = 0;
     mapping(uint256 => PussStruct) public PussMetaData;
     mapping(address => uint256) public owners;
 
@@ -40,7 +40,7 @@ contract Puss is ERC721Enumerable, Ownable {
         for (uint256 i = 0; i < amount; i++) {
             _totalSupply += 1;
             tokenId = _totalSupply;
-            rarity = random() % 5; //TODO more random
+            rarity = (_totalSupply % 5) + 1;
             PussMetaData[tokenId] = PussStruct(1, 0, rarity, "Dolly");
             owners[msg.sender] += 1;
             _safeMint(msg.sender, tokenId);
@@ -87,11 +87,12 @@ contract Puss is ERC721Enumerable, Ownable {
 
     function checkLevelUp(uint256 _tokenId) private {
         if (
-            //TODO: set level to appopriate based on gravy eaten
-            PussMetaData[_tokenId].gravyEaten / PussMetaData[_tokenId].level >=
-            200
+            PussMetaData[_tokenId].gravyEaten / 1000 >
+            PussMetaData[_tokenId].level
         ) {
-            PussMetaData[_tokenId].level += 1;
+            PussMetaData[_tokenId].level =
+                PussMetaData[_tokenId].gravyEaten /
+                1000;
             emit LevelUp(_tokenId, PussMetaData[_tokenId].level);
         }
     }
@@ -125,16 +126,6 @@ contract Puss is ERC721Enumerable, Ownable {
             metaData[i] = PussMetaData[tokenId];
         }
         return metaData;
-    }
-
-    function random() private view returns (uint256) {
-        // sha3 and now have been deprecated -- this is just for testing don't use this for any real randomness
-        return
-            uint256(
-                keccak256(abi.encodePacked(block.difficulty, block.timestamp))
-            );
-        // convert hash to integer
-        // players is an array of entrants
     }
 
     modifier onlyOwnerOf(uint256 _tokenId) {

@@ -17,7 +17,7 @@ async function main() {
   await stake.deployed();
   console.log("stake deployed to:", stake.address);
 
-  await gravy.setStaker(stake.address);
+  await gravy.setMinter(stake.address);
 
 }
 
