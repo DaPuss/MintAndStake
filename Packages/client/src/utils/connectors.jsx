@@ -15,8 +15,18 @@ const infuraId = import.meta.env.VITE_INFURA_ID;
 const chains = [chain.hardhat, chain.avalancheFuji];
 const defaultChain = chain.hardhat;
 
-export const provider = ({ chainId }) => new providers.Web3Provider(window.ethereum, chainId);
+// export const provider = ({ chainId }) => new providers.Web3Provider(window.ethereum, chainId);
+export const provider = ({ chainId }) => {
+  if (chain.hardhat.id == chainId) {
+    return providers.getDefaultProvider(
+      import.meta.env.VITE_APP_PROVIDER_URL /* ,{
+    infura: process.env.REACT_APP_INFURA_KEY,
+    alchemy: process.env.REACT_APP_ALCHEMY_KEY
+  } */
+    );
+  }
+};
 
 export const connectors = ({ chainId }) => {
-  return [new InjectedConnector({ chains, options: { shimDisconnect: true } })];
+  return [new InjectedConnector({ chains })];
 };

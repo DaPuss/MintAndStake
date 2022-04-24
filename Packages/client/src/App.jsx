@@ -5,27 +5,25 @@ import NavigationBar from './components/NavigationBar';
 import Footer from './components/Footer';
 import { Route, Routes } from 'react-router-dom';
 import styled, { createGlobalStyle } from 'styled-components';
-import { Container } from 'react-bootstrap';
 
 const App = () => {
   return (
-    <>
+    <div id="main-container">
       <GlobalStyle />
-      <Container className="rootContainer" fluid>
-        <NavigationBar />
+      <NavigationBar />
+      <div id="main-content">
         <Routes>
           <Route path="/stake" element={<Stake />} />
           <Route path="/Gallary" element={<Gallary />} />
           <Route path="/" element={<Mint />} />
         </Routes>
-        <Footer />
-      </Container>
-    </>
+      </div>
+      <Footer />
+    </div>
   );
 };
 
 export default App;
-//TODO: disable button style
 const GlobalStyle = createGlobalStyle`
   body {
     margin: 0;
@@ -56,7 +54,16 @@ const GlobalStyle = createGlobalStyle`
       margin-top: 5rem;
       margin-bottom: 5rem;
     }
-    .rootContainer {
-      height: 100vh;
+    .main-container {
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+    
+    .main-content {
+      flex: 1;
+    }
+    .main-footer{
+      
     }
 `;

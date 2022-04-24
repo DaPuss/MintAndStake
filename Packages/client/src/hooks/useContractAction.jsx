@@ -32,9 +32,7 @@ const useContractRead = (functionName, addressOrName, contractInterface) => {
 
   const writeContract = useCallback(async (params = {}) => {
     try {
-      const txn = await write({
-        params
-      });
+      const txn = await write(params);
       if (typeof txn.data !== 'undefined') {
         await wait({ wait: txn.data.wait });
       }

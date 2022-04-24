@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Container, Button, Card } from 'react-bootstrap';
 import styled from 'styled-components';
+import Images from '../assets';
 
 const Styles = styled.div`
   .card {
@@ -30,13 +31,13 @@ const Styles = styled.div`
 
 const DisplayCard = (props) => {
   const { metaData } = props;
-  const { name, gravyEaten, image } = metaData;
+  const { name, gravyEaten, src } = metaData;
 
   return (
     <Styles>
       <Card>
         <Card.Body>
-          <Card.Img className="mb-4" variant="top" src={image} />
+          <Card.Img className="mb-4" variant="top" src={src} />
           <Card.Title>{name}</Card.Title>
           <Card.Text>Gravy Eaten: {gravyEaten}</Card.Text>
         </Card.Body>

@@ -16,10 +16,6 @@ const StakeCard = (props) => {
   const handleCloseGravy = () => setShowGravy(false);
   const handleShowGravy = () => setShowGravy(true);
 
-  const [{ data: accountData }, disconnect] = useAccount({
-    fetchEns: true
-  });
-
   const { handleClick, metaData, selected, staked } = props;
   const { id, name, level, gravyEaten, rarity } = metaData;
   const cardSelected = selected ? 'selected' : '';
@@ -28,27 +24,35 @@ const StakeCard = (props) => {
     <Styles>
       <Card className={cardSelected} onClick={() => handleClick(id)}>
         <Card.Body>
+          {<Card.Title>{staked ? 'Adventuring' : 'Snoozing...'}</Card.Title>}
+
           <Card.Img className="mb-4" variant="top" src={Images[`puss${rarity}`]} />
           <Card.Title>{name}</Card.Title>
           <Card.Text>Id: {id}</Card.Text>
           <Card.Text>Level: {level}</Card.Text>
-          <Card.Text>Gravy Eaten: {gravyEaten}</Card.Text>
-          {!staked && (
-            <>
-              <ChangeNameModal
-                handleClose={handleCloseNamechange}
-                show={showNameChange}
-                tokenId={id}
-              />
-              <Button onClick={handleShowNamechange} className={'w-100 mb-2'} variant="primary">
-                Change Name
-              </Button>
-              <EatGravyModal handleClose={handleCloseGravy} show={showGravy} tokenId={id} />
-              <Button onClick={handleShowGravy} className={'w-100'} variant="primary">
-                Eat Gravy
-              </Button>
-            </>
-          )}
+          <Card.Text>$GRAVY Eaten: {gravyEaten}</Card.Text>
+          <>
+            <ChangeNameModal
+              handleClose={handleCloseNamechange}
+              show={showNameChange}
+              tokenId={id}
+            />
+            <Button
+              disabled={staked}
+              onClick={handleShowNamechange}
+              className={'w-100 mb-2'}
+              variant="primary">
+              Change Name
+            </Button>
+            <EatGravyModal handleClose={handleCloseGravy} show={showGravy} tokenId={id} />
+            <Button
+              disabled={staked}
+              onClick={handleShowGravy}
+              className={'w-100'}
+              variant="primary">
+              Eat Gravy
+            </Button>
+          </>
         </Card.Body>
       </Card>
     </Styles>

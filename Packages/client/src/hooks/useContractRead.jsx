@@ -11,11 +11,12 @@ import { ethers } from 'ethers';
 
 const useContractRead = (addressOrName, contractInterface) => {
   const [{ data: signData }, getSigner] = useSigner();
+  const provider = useProvider();
 
   const contract = useContract({
     addressOrName,
     contractInterface,
-    signerOrProvider: signData
+    signerOrProvider: signData ?? provider
   });
 
   const readContract = useCallback(

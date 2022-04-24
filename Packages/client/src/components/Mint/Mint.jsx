@@ -4,25 +4,29 @@ import { useAccount, useConnect, useNetwork } from 'wagmi';
 import { Container, Button, Form, Image, Row, Col } from 'react-bootstrap';
 import styled from 'styled-components';
 import { useContractAction, useContractRead, abi, contracts } from '../../hooks/index.js';
+import { useMetaMaskAccount } from '../../context/AccountContext';
 import Images from '../../assets';
 import DisplayCard from '../DisplayCard';
 import WalletConnect from '../WalletConnect';
 import MintButtons from './MintButtons';
-
+import ConnectPage from '../ConnectPage.jsx';
 const Mint = () => {
   const { readContract } = useContractRead(contracts.PUSS, abi.PUSS);
   const [totalSupply, setTotalSupply] = useState(0);
   const [mintAmount, setMintAmount] = useState(0);
   const handleAdd = () => setMintAmount(mintAmount + 1);
+  const { connected } = useMetaMaskAccount();
   const handleMinus = () => {
     setMintAmount(mintAmount == 0 ? 0 : mintAmount - 1);
   };
 
   useEffect(async () => {
-    const result = await readContract('totalSupply');
-    const supply = parseInt(result.data, 16);
-    setTotalSupply(supply);
-  }, []);
+    if (connected) {
+      const result = await readContract('totalSupply');
+      const supply = parseInt(result.data, 16);
+      setTotalSupply(supply);
+    }
+  }, [connected]);
 
   const [{ data: accountData }, disconnect] = useAccount({
     fetchEns: true
@@ -32,18 +36,21 @@ const Mint = () => {
 
   const handleMint = async () => {
     if (mintAmount <= 0) return;
-    await mintPussWrite({
+    const txn = await mintPussWrite({
       args: [mintAmount],
       overrides: {
         value: ethers.utils.parseEther(mintAmount.toString(16))
       }
     });
-    setTotalSupply(totalSupply + mintAmount);
-    setMintAmount(0);
+    if (typeof txn.error == 'undefined') {
+      setTotalSupply(totalSupply + mintAmount);
+      setMintAmount(0);
+    }
   };
 
-  const exampleCards = { id: 11, name: 'Puss', level: 100, gravyEaten: 100 };
-
+  if (!connected) {
+    return <ConnectPage />;
+  }
   return (
     <Container style={{ height: '100%' }} className="text-center " fluid>
       <Styles style={{ height: '100%' }}>
@@ -59,17 +66,13 @@ const Mint = () => {
             </p>
           </Container>
           <Container>
-            {accountData ? (
-              <MintButtons
-                mintAmount={mintAmount}
-                handleMinus={handleMinus}
-                handleAdd={handleAdd}
-                totalSupply={totalSupply}
-                handleMint={handleMint}
-              />
-            ) : (
-              <WalletConnect />
-            )}
+            <MintButtons
+              mintAmount={mintAmount}
+              handleMinus={handleMinus}
+              handleAdd={handleAdd}
+              totalSupply={totalSupply}
+              handleMint={handleMint}
+            />
           </Container>
         </Container>
       </Styles>

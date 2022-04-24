@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Navbar, Image, Nav, Container, Form } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import WalletConnect from './WalletConnect';
 import styled from 'styled-components';
 
@@ -36,9 +37,15 @@ const Navigation = ({ className }) => {
         <Navbar.Toggle className="margin" aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="m-auto">
-            <Nav.Link href="/">Mint</Nav.Link>
-            <Nav.Link href="/stake">Adventure</Nav.Link>
-            <Nav.Link href="/Gallary">Gallary</Nav.Link>
+            <Nav.Link as={Link} to="/">
+              Mint
+            </Nav.Link>
+            <Nav.Link as={Link} to="/stake">
+              Adventure
+            </Nav.Link>
+            <Nav.Link as={Link} to="/Gallary">
+              Gallary
+            </Nav.Link>
           </Nav>
           <Form className={'margin'}>
             <WalletConnect />

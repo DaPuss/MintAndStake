@@ -39,7 +39,7 @@ export const AccountProvider = ({ children }) => {
   const checkChain = (cId) => {
     const connectedNetwork = getSupportedNetworks(cId);
     if (typeof connectedNetwork == 'undefined') {
-      setAccountErrorMessage('Please Connect To Rinkeby Test Network');
+      setAccountErrorMessage('Please Switch To Fuji Test Network');
       setAllowSignIn(false);
       setNetworkName('');
       disconnect();

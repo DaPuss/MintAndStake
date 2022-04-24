@@ -70,6 +70,7 @@ const StakeGrid = () => {
 
   const handleStakeClick = async () => {
     console.log('stake me: ' + selectedUnstakedId);
+    if (selectedUnstakedId.length == 0) return;
     await approveAllWrite({
       args: [import.meta.env.VITE_STAKE_CONTRACT, true]
     });
@@ -83,6 +84,7 @@ const StakeGrid = () => {
 
   const handleUnstakeClick = async () => {
     console.log('unstake me: ' + selectedStakedId);
+    if (selectedStakedId.length == 0) return;
     await unstakeWrite({
       args: [selectedStakedId]
     });
@@ -149,52 +151,46 @@ const StakeGrid = () => {
   return (
     <Container className="text-center" fluid>
       <Styles>
-        {card?.staked && (
-          <>
-            <h2 className="m-4">Puss Currently On Adventure</h2>
-            <CardGroup>
-              <Row xs={1} md={2} lg={4} xl={6} className="g-4">
-                {card.staked.map((item) => (
-                  <Col key={`col_${item.id}`}>
-                    <StakeCard
-                      key={item.id}
-                      handleClick={handleStakedCardClick}
-                      metaData={item}
-                      selected={selectedStakedId.includes(item.id)}
-                      staked={true}
-                    />
-                  </Col>
-                ))}
-              </Row>
-            </CardGroup>
-            <Button onClick={handleUnstakeClick} className="m-4">
-              Send to Sleep
-            </Button>
-          </>
-        )}
-        {card?.unstaked && (
-          <>
-            <h2 className="m-4">Puss Currently Sleeping</h2>
-            <CardGroup>
-              <Row xs={1} md={2} lg={4} xl={6} className="g-4">
-                {card.unstaked.map((item) => (
-                  <Col key={`col_${item.id}`}>
-                    <StakeCard
-                      key={item.id}
-                      handleClick={handleUnstakedCardClick}
-                      metaData={item}
-                      selected={selectedUnstakedId.includes(item.id)}
-                      staked={false}
-                    />
-                  </Col>
-                ))}
-              </Row>
-            </CardGroup>
-            <Button onClick={handleStakeClick} className="m-4">
-              Send on Adventure
-            </Button>
-          </>
-        )}
+        <h2 className="m-4">Look at all those duck! ... I mean Puss!</h2>
+        <p className="bodyText">
+          Send Dolly on an adventure deep into the dimensions incomprehensible to the avarage Puss,
+          here she will travel over vast distances, battle against vicious creatures, and overcome
+          any obsticle set in her way so she can bring home liquid gold.... Gravy
+        </p>
+        <CardGroup>
+          <Row xs={1} md={2} lg={4} className="g-4">
+            {card?.staked &&
+              card.staked.map((item) => (
+                <Col key={`col_${item.id}`}>
+                  <StakeCard
+                    key={item.id}
+                    handleClick={handleStakedCardClick}
+                    metaData={item}
+                    selected={selectedStakedId.includes(item.id)}
+                    staked={true}
+                  />
+                </Col>
+              ))}
+            {card?.unstaked &&
+              card.unstaked.map((item) => (
+                <Col key={`col_${item.id}`}>
+                  <StakeCard
+                    key={item.id}
+                    handleClick={handleUnstakedCardClick}
+                    metaData={item}
+                    selected={selectedUnstakedId.includes(item.id)}
+                    staked={false}
+                  />
+                </Col>
+              ))}
+          </Row>
+        </CardGroup>
+        <Button onClick={handleUnstakeClick} className="m-4">
+          Send to Sleep
+        </Button>
+        <Button onClick={handleStakeClick} className="m-4">
+          Send on Adventure
+        </Button>
       </Styles>
     </Container>
   );
@@ -204,6 +200,7 @@ export default StakeGrid;
 
 const Styles = styled.div`
   .btn-primary {
+    width: 75%;
     margin-right: 0px;
     background-color: ${(props) => props.theme.primaryPurple};
     color: ${(props) => props.theme.primaryOrange};
@@ -213,9 +210,5 @@ const Styles = styled.div`
   .btn-primary:hover {
     background-color: ${(props) => props.theme.primaryOrange};
     color: ${(props) => props.theme.primaryPurple};
-  }
-  h2 {
-    text-decoration: underline;
-    text-decoration-thickness: 3px;
   }
 `;

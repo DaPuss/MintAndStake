@@ -1,8 +1,38 @@
 import { useState } from 'react';
 import { Button } from 'react-bootstrap';
-import { useAccount, useConnect } from 'wagmi';
-import WalletConnectModal from './WalletConnectModal';
 import styled from 'styled-components';
+import { useMetaMaskAccount } from '../context/AccountContext';
+
+const WalletConnect = () => {
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+  const { connectedAddr, connected, disconnect, connectToMetaMask, loading, accountErrorMessage } =
+    useMetaMaskAccount();
+
+  const getAddress = (address) => {
+    return !address
+      ? ''
+      : `${address.slice(0, 3)}..${address.slice(address.length - 3, address.length)}`;
+  };
+
+  return (
+    <Styles>
+      {connected ? (
+        <Button className="mt-2" onClick={disconnect}>
+          Disconnect {getAddress(connectedAddr)}
+        </Button>
+      ) : (
+        <Button className="mt-2" onClick={connectToMetaMask}>
+          {accountErrorMessage ? accountErrorMessage : 'Connect to MetaMask'}
+        </Button>
+      )}
+    </Styles>
+  );
+};
+
+export default WalletConnect;
 
 const Styles = styled.div`
   .btn-primary {
@@ -16,39 +46,3 @@ const Styles = styled.div`
     color: ${(props) => props.theme.primaryPurple};
   }
 `;
-
-const WalletConnect = () => {
-  const [show, setShow] = useState(false);
-
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
-  const [{ data: accountData }, disconnect] = useAccount({
-    fetchEns: true
-  });
-
-  const getAddress = (address) => {
-    return !address
-      ? ''
-      : `${address.slice(0, 3)}..${address.slice(address.length - 3, address.length)}`;
-  };
-
-  if (accountData) {
-    return (
-      <div>
-        <Button onClick={disconnect}>Disconnect {getAddress(accountData.address)}</Button>
-      </div>
-    );
-  }
-
-  return (
-    <Styles>
-      <Button className="mt-2" onClick={handleShow}>
-        Connect
-      </Button>
-      <WalletConnectModal handleClose={handleClose} show={show} />
-    </Styles>
-  );
-};
-
-export default WalletConnect;
