@@ -3,7 +3,8 @@ import { Button, Container, Form, Row, Col } from 'react-bootstrap';
 import WalletConnect from './WalletConnect';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { RiDiscordLine, RiTwitterLine } from 'react-icons/Ri';
+import { RiDiscordLine } from '@react-icons/all-files/ri/RiDiscordLine';
+import { RiTwitterLine } from '@react-icons/all-files/ri/RiTwitterLine';
 
 const FooterBar = ({ className }) => {
   return (
