@@ -7,7 +7,7 @@ import "./Puss.sol";
 import "./Gravy.sol";
 
 contract Stake is Ownable, IERC721Receiver {
-    uint256 public rewardRate = 10;
+    uint256 public rewardRate = 1;
     address tokenAddress;
     address nftAddress;
 
@@ -25,14 +25,13 @@ contract Stake is Ownable, IERC721Receiver {
     }
 
     function calculateRewards(address account) public view returns (uint256) {
-        return (((stakers[account].amountStaked * rewardPerToken(account)) /
-            1e18) + stakers[account].rewardsOwed);
+        return ((stakers[account].amountStaked * rewardPerToken(account)) +
+            stakers[account].rewardsOwed);
     }
 
     function rewardPerToken(address account) public view returns (uint256) {
         return ((block.timestamp - stakers[account].timeOfLastUpdate) *
-            rewardRate *
-            1e18);
+            rewardRate);
     }
 
     modifier updateReward(address account) {

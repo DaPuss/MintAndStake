@@ -34,14 +34,14 @@ const Stake = () => {
     console.log('Claimable : ', BigNumber.from(gravyToClaim.data).toNumber());
     setClaimableGravy(BigNumber.from(gravyToClaim.data).toNumber());
     const currentGravy = await getBalance();
-    setCurrentGravy(BigNumber.from(currentGravy.data.value).toNumber());
+    setCurrentGravy(currentGravy.data.formatted);
   }, [connected]);
 
   const handleClaimGravy = async () => {
     await claimGravyWrite();
     setClaimableGravy(0);
     const currentGravy = await getBalance();
-    setCurrentGravy(BigNumber.from(currentGravy.data.value).toNumber());
+    setCurrentGravy(currentGravy.data.formatted);
   };
   if (!connected) {
     return <ConnectPage />;
