@@ -1,7 +1,7 @@
 
-import Images from './';
+import Images from '.';
 
-export const DataCards = [
+export const dataCards = [
     { name: 'Puss', gravyEaten: 100, src:Images[`puss${1}`]},
     { name: 'Puss', gravyEaten: 200, src:Images[`puss${2}`]},
     { name: 'Puss', gravyEaten: 100, src:Images[`puss${3}`]},
