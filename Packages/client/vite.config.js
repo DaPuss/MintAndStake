@@ -34,7 +34,8 @@ import rollupNodePolyFill from 'rollup-plugin-node-polyfills'
                 // Enable rollup polyfills plugin
                 // used during production bundling
                 rollupNodePolyFill()
-            ]
+            ],
+            external: ['@react-icons/Ri']
         }
     }
 };
