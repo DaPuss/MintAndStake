@@ -17,8 +17,8 @@ const MintButtons = ({ mintAmount, handleMinus, handleAdd, totalSupply, handleMi
       />
       <Button onClick={handleAdd}>+</Button>
       <Container>
-        <Button className="mt-2" onClick={handleMint}>
-          Mint
+        <Button disabled={totalSupply == 1000} className="mt-2" onClick={handleMint}>
+          {totalSupply == 1000 ? 'Sold out my guy!' : 'Mint'}
         </Button>
       </Container>
     </Container>

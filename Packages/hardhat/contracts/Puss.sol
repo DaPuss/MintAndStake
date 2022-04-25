@@ -25,8 +25,8 @@ contract Puss is ERC721Enumerable, Ownable {
     constructor(address _gravyAddress) ERC721("Puss", "PUSS") {
         gravyAddress = _gravyAddress;
         maxSupply = 1000;
-        mintPrice = 1 ether;
-        nameChangeCost = 100;
+        mintPrice = 0.1 ether;
+        nameChangeCost = 1000;
     }
 
     function mintPuss(uint256 amount) external payable {
@@ -41,7 +41,7 @@ contract Puss is ERC721Enumerable, Ownable {
             _totalSupply += 1;
             tokenId = _totalSupply;
             rarity = (_totalSupply % 5) + 1;
-            PussMetaData[tokenId] = PussStruct(1, 0, rarity, "Dolly");
+            PussMetaData[tokenId] = PussStruct(0, 0, rarity, "Dolly");
             owners[msg.sender] += 1;
             _safeMint(msg.sender, tokenId);
 

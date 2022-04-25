@@ -84,8 +84,7 @@ function getSupportedNetworks(chainId) {
   const networks = {
     1337: 'Localhost 8545',
     31337: 'Localhost 8545',
-    4: 'Rinkeby',
-    '0x4': 'Rinkeby'
+    43113: 'Fuji'
   };
   return networks[chainId];
 }

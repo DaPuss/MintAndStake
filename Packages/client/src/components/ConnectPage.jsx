@@ -17,7 +17,7 @@ const ConnectPage = () => {
           className="d-flex flex-col flex-wrap contentContainer justify-content-center align-items-center text-center">
           <Container>
             <h2 className="header">Connect Your Puss</h2>
-            <Image width={'50%'} roundedCircle={true} className="mt-5" src={Images['puss1']} />
+            <Image width={'50%'} roundedCircle={true} className="mt-5" src={Images['puss20']} />
             <p className="bodyText">
               It's probably a good idea to connect your wallet huh? You won't be doing anything till
               you get around to that....

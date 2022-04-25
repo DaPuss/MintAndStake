@@ -7,10 +7,7 @@ import "./Puss.sol";
 import "./Gravy.sol";
 
 contract Stake is Ownable, IERC721Receiver {
-    uint256 private _totalSupply;
-    uint256 public rewardRate = 1000;
-    uint256 public lastUpdateTime;
-    uint256 public rewardPerTokenStored;
+    uint256 public rewardRate = 10;
     address tokenAddress;
     address nftAddress;
 
@@ -19,7 +16,6 @@ contract Stake is Ownable, IERC721Receiver {
         uint256 timeOfLastUpdate;
         uint256 rewardsOwed;
     }
-    mapping(address => uint256) public userRewardPerTokenPaid;
     mapping(address => Staker) public stakers;
     mapping(uint256 => bool) public vault;
 
@@ -29,28 +25,20 @@ contract Stake is Ownable, IERC721Receiver {
     }
 
     function calculateRewards(address account) public view returns (uint256) {
-        return
-            ((stakers[msg.sender].amountStaked *
-                (rewardPerToken() - userRewardPerTokenPaid[account])) / 1e18) +
-            stakers[account].rewardsOwed;
+        return (((stakers[account].amountStaked * rewardPerToken(account)) /
+            1e18) + stakers[account].rewardsOwed);
     }
 
-    function rewardPerToken() public view returns (uint256) {
-        if (_totalSupply == 0) {
-            return rewardPerTokenStored;
-        }
-        return
-            rewardPerTokenStored +
-            (((block.timestamp - lastUpdateTime) * rewardRate * 1e18) /
-                _totalSupply);
+    function rewardPerToken(address account) public view returns (uint256) {
+        return ((block.timestamp - stakers[account].timeOfLastUpdate) *
+            rewardRate *
+            1e18);
     }
 
     modifier updateReward(address account) {
-        rewardPerTokenStored = rewardPerToken();
-        lastUpdateTime = block.timestamp;
-
-        stakers[account].rewardsOwed = calculateRewards(account);
-        userRewardPerTokenPaid[account] = rewardPerTokenStored;
+        uint256 rewards = calculateRewards(account);
+        stakers[account].timeOfLastUpdate = block.timestamp;
+        stakers[account].rewardsOwed = rewards;
         _;
     }
 

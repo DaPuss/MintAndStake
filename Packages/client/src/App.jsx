@@ -45,6 +45,10 @@ const GlobalStyle = createGlobalStyle`
       background-color: ${(props) => props.theme.primaryOrange};
       color: ${(props) => props.theme.primaryPurple};
     }
+    .btn-primary:disabled {
+      background-color: ${(props) => props.theme.primaryPurple};
+      color: ${(props) => props.theme.primaryOrange};
+    }
     .modal-content{
       background-color: ${(props) => props.theme.primaryLightGrey};;
       border-width: 4px;

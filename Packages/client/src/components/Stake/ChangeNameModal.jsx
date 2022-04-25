@@ -3,30 +3,8 @@ import { Modal, Button, Form } from 'react-bootstrap';
 import styled from 'styled-components';
 import { useContractAction, abi, contracts } from '../../hooks/index.js';
 
-const ChangeNameModal = ({ handleClose, show, tokenId }) => {
+const ChangeNameModal = ({ handleClose, show, tokenId, onNameChange }) => {
   const [value, setValue] = useState('');
-  const { writeContract: changeNameWrite } = useContractAction(
-    'changeName',
-    contracts.PUSS,
-    abi.PUSS
-  );
-  const { writeContract: increaceAllowanceWrite } = useContractAction(
-    'increaseAllowance',
-    contracts.GRAVY,
-    abi.GRAVY
-  );
-
-  const onNameChange = async () => {
-    //allowence
-    await increaceAllowanceWrite({
-      args: [import.meta.env.VITE_PUSS_CONTRACT, 100]
-    });
-    //changeName
-    await changeNameWrite({
-      args: [value, Number(tokenId)]
-    });
-    handleClose();
-  };
 
   return (
     <Modal className="text-center" show={show} onHide={handleClose}>
@@ -39,7 +17,7 @@ const ChangeNameModal = ({ handleClose, show, tokenId }) => {
               placeholder="name"
               onChange={(e) => setValue(e.target.value)}
             />
-            <Button disabled={!value} className="mt-2" onClick={() => onNameChange()}>
+            <Button disabled={!value} className="mt-2" onClick={() => onNameChange(value)}>
               Change Name
             </Button>
           </Form>

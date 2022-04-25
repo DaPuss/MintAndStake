@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Container, Button, CardGroup, Card, Row, Col } from 'react-bootstrap';
+import { Container, Button, Image, CardGroup, Card, Row, Col } from 'react-bootstrap';
 import { useAccount, useConnect } from 'wagmi';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { BigNumber } from 'ethers';
+import Images from '../../assets';
 import { formatMetadata, formatTokenIds } from '../../utils/transactionFormatting';
 import { useContractAction, useContractRead, abi, contracts } from '../../hooks/index.js';
 import StakeCard from './StakeCard';
@@ -139,9 +140,10 @@ const StakeGrid = () => {
   if (!card?.unstaked && !card?.staked) {
     return (
       <Container className="text-center" fluid>
+        <Image width={'50%'} roundedCircle={true} className="mt-5" src={Images['puss2']} />
         <h1 className="m-4">You currently own no Puss</h1>
         <h2 className="m-4">Head over and mint some!</h2>
-        <Button onClick={() => navigate('/mint')} className="m-4">
+        <Button onClick={() => navigate('/')} className="m-4">
           Mint
         </Button>
       </Container>

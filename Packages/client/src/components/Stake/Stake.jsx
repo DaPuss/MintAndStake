@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container, Button } from 'react-bootstrap';
+import { Container, Button, Row, Col } from 'react-bootstrap';
 import { useAccount, useBalance, useConnect } from 'wagmi';
 import { BigNumber } from 'ethers';
 import styled from 'styled-components';
@@ -31,6 +31,7 @@ const Stake = () => {
     const gravyToClaim = await readStakeContract('calculateRewards', {
       args: connectedAddr
     });
+    console.log('Claimable : ', BigNumber.from(gravyToClaim.data).toNumber());
     setClaimableGravy(BigNumber.from(gravyToClaim.data).toNumber());
     const currentGravy = await getBalance();
     setCurrentGravy(BigNumber.from(currentGravy.data.value).toNumber());
@@ -50,9 +51,9 @@ const Stake = () => {
       <Styles>
         <Container className="d-flex-block justify-content-center align-items-center text-center">
           <h2 className="header">All about the $GRAVY</h2>
-          <h3 className="">Current Gravy: {currentGravy}</h3>
-          <h3 className="">Gravy to claim: {claimableGravy}</h3>
-          <Button onClick={handleClaimGravy}>Claim Gravy</Button>
+          <h3 className="">Owned Gravy: {currentGravy}</h3>
+          <h3 className="">Claimable Gravy: {claimableGravy}</h3>
+          <Button onClick={handleClaimGravy}>Claim Gravy </Button>
         </Container>
         <Container className="d-flex justify-content-center align-items-center">
           {connected ? <StakeGrid /> : <WalletConnect />}

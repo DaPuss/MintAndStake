@@ -11,12 +11,16 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   }
 });
 
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
+const AVALANCHE_TEST_PRIVATE_KEY = "";
 
-/**
- * @type import('hardhat/config').HardhatUserConfig
- */
 module.exports = {
   solidity: "0.8.4",
+  networks: {
+    avalancheTest: {
+      url: 'https://api.avax-test.network/ext/bc/C/rpc',
+      gasPrice: 225000000000,
+      chainId: 43113,
+      accounts: [`0x${AVALANCHE_TEST_PRIVATE_KEY}`]
+    }
+  }
 };

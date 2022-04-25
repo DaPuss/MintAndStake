@@ -3,27 +3,8 @@ import { Modal, Button, Form } from 'react-bootstrap';
 import styled from 'styled-components';
 import { useContractAction, abi, contracts } from '../../hooks/index.js';
 
-const EatGravyModal = ({ handleClose, show, tokenId }) => {
+const EatGravyModal = ({ handleClose, show, tokenId, onEatGravy }) => {
   const [value, setValue] = useState(0);
-  const { writeContract: increaceAllowanceWrite } = useContractAction(
-    'increaseAllowance',
-    contracts.GRAVY,
-    abi.GRAVY
-  );
-  const { writeContract: eatGravyWrite } = useContractAction('eatGravy', contracts.PUSS, abi.PUSS);
-
-  const onEatGravy = async () => {
-    //TODO: make sure balance is high enough
-    //allowence
-    await increaceAllowanceWrite({
-      args: [import.meta.env.VITE_PUSS_CONTRACT, value]
-    });
-    //eatGravy
-    await eatGravyWrite({
-      args: [value, Number(tokenId)]
-    });
-    handleClose();
-  };
 
   return (
     <Modal className="text-center" show={show} onHide={handleClose}>
@@ -37,7 +18,7 @@ const EatGravyModal = ({ handleClose, show, tokenId }) => {
               placeholder="0"
               onChange={(e) => setValue(e.target.value)}
             />
-            <Button disabled={value < 0} className="mt-2" onClick={() => onEatGravy()}>
+            <Button disabled={value <= 0} className="mt-2" onClick={() => onEatGravy(value)}>
               Eat Gravy
             </Button>
           </Form>
