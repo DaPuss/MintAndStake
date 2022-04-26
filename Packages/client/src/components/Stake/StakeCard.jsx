@@ -26,7 +26,7 @@ const StakeCard = (props) => {
   const cardSelected = selected ? 'selected' : '';
 
   const { writeContract: increaceAllowanceWrite } = useContractAction(
-    'increaseAllowance',
+    'setAllowance',
     contracts.GRAVY,
     abi.GRAVY
   );
@@ -44,7 +44,8 @@ const StakeCard = (props) => {
 
   const checkBalance = async (value) => {
     const currentGravy = await getBalance();
-    const balance = BigNumber.from(currentGravy.data.value).toNumber();
+    const balance = parseInt(currentGravy.data.formatted);
+    console.log(`balance: ${balance} value: ${value}`);
     return balance >= value;
   };
 
@@ -63,11 +64,11 @@ const StakeCard = (props) => {
   };
 
   const onNameChange = async (value) => {
-    if (!(await checkBalance(parseInt(100)))) return;
+    if (!(await checkBalance(parseInt(1000)))) return;
     const allowTxn = await increaceAllowanceWrite({
-      args: [import.meta.env.VITE_PUSS_CONTRACT, 100]
+      args: [import.meta.env.VITE_PUSS_CONTRACT, 1000]
     });
-    //changeName
+    console.log(allowTxn);
     const nameTxn = await changeNameWrite({
       args: [value, Number(id)]
     });

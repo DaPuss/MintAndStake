@@ -35,6 +35,11 @@ const WalletConnect = () => {
 export default WalletConnect;
 
 const Styles = styled.div`
+  @media (max-width: 768px) {
+    .btn-primary {
+      text-align: left;
+    }
+  }
   .btn-primary {
     background-color: ${(props) => props.theme.primaryPurple};
     color: ${(props) => props.theme.primaryOrange};

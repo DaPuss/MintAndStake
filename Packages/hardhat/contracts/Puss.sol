@@ -26,7 +26,7 @@ contract Puss is ERC721Enumerable, Ownable {
         gravyAddress = _gravyAddress;
         maxSupply = 1000;
         mintPrice = 0.1 ether;
-        nameChangeCost = 1000;
+        nameChangeCost = 1000 * 10**18;
     }
 
     function mintPuss(uint256 amount) external payable {
@@ -73,12 +73,17 @@ contract Puss is ERC721Enumerable, Ownable {
         onlyOwnerOf(_tokenId)
     {
         require(_amount > 0, "You can't eat 0 gravy");
+        uint256 transferAmount = _amount * 10**18;
         require(
-            IERC20(gravyAddress).balanceOf(msg.sender) >= _amount,
+            IERC20(gravyAddress).balanceOf(msg.sender) >= transferAmount,
             "You don't own enough gravy"
         );
 
-        IERC20(gravyAddress).transferFrom(msg.sender, address(this), _amount);
+        IERC20(gravyAddress).transferFrom(
+            msg.sender,
+            address(this),
+            transferAmount
+        );
         PussMetaData[_tokenId].gravyEaten += _amount;
         emit GravyEaten(_tokenId, _amount);
 

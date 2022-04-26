@@ -76,7 +76,7 @@ const NavigationBar = styled(Navigation)`
       margin-left: 0px;
     }
     .margin {
-      margin-left: 0px !important;
+      margin-left: 2rem !important;
     }
     .nav-link {
       font-size: 1.5rem;

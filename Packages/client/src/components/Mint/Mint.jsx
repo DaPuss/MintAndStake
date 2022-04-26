@@ -36,11 +36,12 @@ const Mint = () => {
 
   const handleMint = async () => {
     if (mintAmount <= 0) return;
-    console.log(mintAmount * 0.1);
+    const amount = (mintAmount * 0.1).toFixed(2);
+    console.log(amount);
     const txn = await mintPussWrite({
       args: [mintAmount],
       overrides: {
-        value: ethers.utils.parseEther((mintAmount * 0.1).toString())
+        value: ethers.utils.parseEther(amount.toString())
       }
     });
     if (typeof txn.error == 'undefined') {

@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "./Puss.sol";
 import "./Gravy.sol";
-
 contract Stake is Ownable, IERC721Receiver {
     uint256 public rewardRate = 1;
     address tokenAddress;
