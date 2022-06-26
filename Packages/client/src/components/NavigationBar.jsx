@@ -44,7 +44,7 @@ const Navigation = ({ className }) => {
               Adventure
             </Nav.Link>
             <Nav.Link as={Link} to="/Gallary">
-              Gallary
+              Gallery
             </Nav.Link>
           </Nav>
           <Form className={'margin'}>
